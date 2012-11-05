@@ -1,11 +1,11 @@
 package main
 
 import (
+	"compress/bzip2"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"os"
-	"compress/gzip"
-	"compress/bzip2"
 )
 
 type operation int
@@ -39,10 +39,13 @@ func main() {
 
 	switch op {
 	case CREATE:
+		if len(fileList) == 0 {
+			printFatal("Refusing to create an empty archive")
+		}
 		if filename != "" {
-			f, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC, 0666)
+			f, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Opening archive %s failed: %v\n", f, err)
+				fmt.Fprintf(os.Stderr, "Opening archive %s failed: %v\n", filename, err)
 				os.Exit(1)
 			}
 			defer f.Close()
@@ -58,9 +61,6 @@ func main() {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Changing to %s failed: %v\n", directory, err)
 			os.Exit(1)
-		}
-		if len(fileList) == 0 {
-			printFatal("Refusing to create an empty archive")
 		}
 		createArchive()
 	case LIST, EXTRACT:
@@ -157,8 +157,8 @@ PARSE_LOOP:
 			break
 		}
 	}
-	if j < len(os.Args) {
-		fileList = os.Args[j:]
+	if i < len(os.Args) {
+		fileList = os.Args[i:]
 	}
 }
 
