@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-func createArchive() {
+func createArchive() int {
 	archive := tar.NewWriter(output)
 	defer archive.Close()
 	exit_value := 0
@@ -24,7 +24,7 @@ func createArchive() {
 			// TODO: add uid/gid and/or uname/gname
 			// TODO: handle directories, symlinks and other file types
 
-			switch (info.Mode() & os.ModeType) {
+			switch info.Mode() & os.ModeType {
 			case 0:
 				hdr.Typeflag = tar.TypeReg
 			case os.ModeDir:
@@ -46,12 +46,12 @@ func createArchive() {
 			case os.ModeDevice:
 				fmt.Fprintf(os.Stderr, "Warning: device files are currently unsupported\n")
 				return nil
-			/*
-				if (info.Mode() & os.ModeCharDevice) != 0 {
-					os.Typeflag = tar.TypeChar
-				} else {
-					os.Typeflag = tar.TypeBlock
-				}
+				/*
+					if (info.Mode() & os.ModeCharDevice) != 0 {
+						os.Typeflag = tar.TypeChar
+					} else {
+						os.Typeflag = tar.TypeBlock
+					}
 				*/
 			}
 
@@ -79,5 +79,6 @@ func createArchive() {
 			exit_value = 1
 		}
 	}
-	os.Exit(exit_value)
+
+	return exit_value
 }

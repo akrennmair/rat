@@ -62,7 +62,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Changing to %s failed: %v\n", directory, err)
 			os.Exit(1)
 		}
-		createArchive()
+		os.Exit(createArchive())
 	case LIST, EXTRACT:
 		if filename != "" {
 			f, err := os.Open(filename)
@@ -85,14 +85,14 @@ func main() {
 			input = bzip2.NewReader(input)
 		}
 		if op == LIST {
-			listArchive()
+			os.Exit(listArchive())
 		} else {
 			err := os.Chdir(directory)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Changing to %s failed: %v\n", directory, err)
 				os.Exit(1)
 			}
-			extractArchive()
+			os.Exit(extractArchive())
 		}
 	default:
 		fmt.Printf("Error: no/invalid operation\n")

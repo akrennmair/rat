@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func listArchive() {
+func listArchive() int {
 	archive := tar.NewReader(input)
 
 	for {
@@ -17,7 +17,7 @@ func listArchive() {
 		}
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "An error occured while reading archive: %v\n", err)
-			os.Exit(1)
+			return 1
 		}
 
 		if verbose {
@@ -40,5 +40,5 @@ func listArchive() {
 		fmt.Fprintf(os.Stdout, "%s\n", hdr.Name)
 	}
 
-	os.Exit(0)
+	return 0
 }
