@@ -15,7 +15,6 @@ const (
 	CREATE  operation = iota
 	LIST    operation = iota
 	EXTRACT operation = iota
-	// TODO: add -r (append files) and -u (append updated files)
 )
 
 var (
@@ -43,13 +42,17 @@ func main() {
 			printFatal("Refusing to create an empty archive")
 		}
 		if filename != "" {
-			f, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Opening archive %s failed: %v\n", filename, err)
-				os.Exit(1)
+			if filename == "-" {
+				output = os.Stdout
+			} else {
+				f, err := os.OpenFile(filename, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0666)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Opening archive %s failed: %v\n", filename, err)
+					os.Exit(1)
+				}
+				defer f.Close()
+				output = f
 			}
-			defer f.Close()
-			output = f
 		}
 		if useGzip {
 			output = gzip.NewWriter(output)
@@ -65,13 +68,17 @@ func main() {
 		os.Exit(createArchive())
 	case LIST, EXTRACT:
 		if filename != "" {
-			f, err := os.Open(filename)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Opening archive %s failed: %v\n", f, err)
-				os.Exit(1)
+			if filename == "-" {
+				input = os.Stdin
+			} else {
+				f, err := os.Open(filename)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Opening archive %s failed: %v\n", filename, err)
+					os.Exit(1)
+				}
+				defer f.Close()
+				input = f
 			}
-			defer f.Close()
-			input = f
 		}
 		if useGzip {
 			gzipreader, err := gzip.NewReader(input)
@@ -163,12 +170,33 @@ PARSE_LOOP:
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, `usage: %s [options...] [file]...
+	fmt.Fprintf(os.Stderr,
+		`usage:  %s [flags <args>] [files | directories]
+        %s {-c} [options] [files | directories]
+        %s {-t | -x} [options]
+
+	Options:
+		-f file
+			Read the archive from or write the archive to the specified file.
+			The filename can be - for standard input or standard output.
+		-C directory
+			In c mode, this changes the directory before adding the files to
+			the archive. In x mode, this changes the directory after opening
+			the archive but before extracting files from the archive.
+		-v
+			Produce verbose output.
+		-z
+			Use gzip compression.
+		-j
+			Use bzip2 compression (only available for decompression).
+		-h
+			Show this help.
+
 	Examples:
-		tar -cf archive.tar foo bar # create archive.tar from files foo and bar.
-		tar -tvf archive.tar        # liste all files in archive.tar verbosly.
-		tar -xf archive.tar         # extract all files from archive.tar.
-`, os.Args[0])
+		rat -cf archive.tar foo bar # create archive.tar from files foo and bar.
+		rat -tvf archive.tar        # list all files in archive.tar verbosly.
+		rat -xf archive.tar         # extract all files from archive.tar.
+`, os.Args[0], os.Args[0], os.Args[0])
 	os.Exit(1)
 
 }

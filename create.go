@@ -15,6 +15,13 @@ func createArchive() int {
 
 	for _, f := range fileList {
 		err := filepath.Walk(f, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if verbose {
+				fmt.Fprintf(os.Stderr, "%s\n", path)
+			}
 
 			var hdr tar.Header
 			hdr.Name = path
@@ -22,7 +29,6 @@ func createArchive() int {
 			hdr.Mode = int64(info.Mode())
 			hdr.ModTime = info.ModTime()
 			// TODO: add uid/gid and/or uname/gname
-			// TODO: handle directories, symlinks and other file types
 
 			switch info.Mode() & os.ModeType {
 			case 0:
