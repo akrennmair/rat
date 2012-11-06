@@ -19,7 +19,7 @@ const (
 
 var (
 	input     io.Reader      = os.Stdin
-	output    io.WriteCloser = os.Stdout
+	output    io.Writer      = os.Stdout
 	fileList                 = []string{}
 	filename                 = ""
 	directory                = "."
