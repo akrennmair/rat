@@ -18,15 +18,15 @@ const (
 )
 
 var (
-	input     io.Reader      = os.Stdin
-	output    io.Writer      = os.Stdout
-	fileList                 = []string{}
-	filename                 = ""
-	directory                = "."
-	useGzip                  = false
-	useBzip2                 = false
-	verbose                  = false
-	op        operation      = INVALID
+	input     io.Reader = os.Stdin
+	output    io.Writer = os.Stdout
+	fileList            = []string{}
+	filename            = ""
+	directory           = "."
+	useGzip             = false
+	useBzip2            = false
+	verbose             = false
+	op        operation = INVALID
 )
 
 func main() {

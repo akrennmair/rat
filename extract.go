@@ -10,7 +10,7 @@ import (
 )
 
 func makedev(major, minor int64) int {
-	return int(((major&0xfff)<<8) | (minor&0xff) | ((major&^0xfff)<<32) | ((minor&0xfffff00)<<12))
+	return int(((major & 0xfff) << 8) | (minor & 0xff) | ((major &^ 0xfff) << 32) | ((minor & 0xfffff00) << 12))
 }
 
 func extractArchive() int {

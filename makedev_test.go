@@ -5,11 +5,11 @@ import "testing"
 func TestMakedev(t *testing.T) {
 	var testdata = []struct {
 		Major, Minor int64
-		Result int
-	} {
-		{ 1, 100, 356 },
-		{ 99, 23, 25367 },
-		{ 254, 3, 65027 },
+		Result       int
+	}{
+		{1, 100, 356},
+		{99, 23, 25367},
+		{254, 3, 65027},
 	}
 
 	for i, tt := range testdata {
