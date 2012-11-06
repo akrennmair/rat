@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/user"
 	"path/filepath"
+	"syscall"
 )
 
 func createArchive() int {
@@ -28,7 +30,15 @@ func createArchive() int {
 			hdr.Size = info.Size()
 			hdr.Mode = int64(info.Mode())
 			hdr.ModTime = info.ModTime()
-			// TODO: add uid/gid and/or uname/gname
+
+			// this is not portable:
+			hdr.Uid = int(info.Sys().(*syscall.Stat_t).Uid)
+			hdr.Gid = int(info.Sys().(*syscall.Stat_t).Gid)
+
+			if user, err := user.LookupId(fmt.Sprintf("%d", hdr.Uid)); err == nil {
+				hdr.Uname = user.Name
+			}
+			// TODO: lookup group, too.
 
 			switch info.Mode() & os.ModeType {
 			case 0:
@@ -39,7 +49,7 @@ func createArchive() int {
 				hdr.Typeflag = tar.TypeSymlink
 				linkname, err := os.Readlink(path)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Warning: can't readlink a symlink\n")
+					fmt.Fprintf(os.Stderr, "Warning: can't readlink a symlink: %v\n", err)
 					return nil
 				} else {
 					hdr.Linkname = linkname

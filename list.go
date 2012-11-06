@@ -34,8 +34,19 @@ func listArchive() int {
 			case tar.TypeBlock:
 				mode |= os.ModeDevice
 			}
-			// TODO: handle uid/gid and/or uname/gname
-			fmt.Fprintf(os.Stdout, "%s %9d %s ", mode.String(), hdr.Size, hdr.ModTime.Format("2006-01-02 15:04"))
+
+			username := hdr.Uname
+			if username == "" {
+				username = fmt.Sprintf("%d", hdr.Uid)
+			}
+			group := hdr.Gname
+			if group == "" {
+				group = fmt.Sprintf("%d", hdr.Gid)
+			}
+
+			user_group := username + "/" + group
+
+			fmt.Fprintf(os.Stdout, "%s %-10s %9d %s ", mode.String(), user_group, hdr.Size, hdr.ModTime.Format("2006-01-02 15:04"))
 		}
 		fmt.Fprintf(os.Stdout, "%s\n", hdr.Name)
 	}

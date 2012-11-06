@@ -2,11 +2,16 @@ package main
 
 import (
 	"archive/tar"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"syscall"
 )
+
+func makedev(major, minor int64) int {
+	return int(((major&0xfff)<<8) | (minor&0xff) | ((major&^0xfff)<<32) | ((minor&0xfffff00)<<12))
+}
 
 func extractArchive() int {
 	archive := tar.NewReader(input)
@@ -42,15 +47,15 @@ func extractArchive() int {
 				}
 			}
 		case tar.TypeSymlink:
-			// TODO: implement!
+			err = os.Link(hdr.Name, hdr.Linkname)
 		case tar.TypeFifo:
 			err = syscall.Mkfifo(hdr.Name, uint32(hdr.Mode))
 		case tar.TypeChar:
-			fmt.Fprintf(os.Stderr, "Sorry, character devices not supported yet\n")
-			//err = syscall.Mknod(hdr.Name, os.S_IFCHR, 
+			err = errors.New("character devices unsupported")
+			err = syscall.Mknod(hdr.Name, syscall.S_IFCHR, makedev(hdr.Devmajor, hdr.Devminor))
 		case tar.TypeBlock:
-			fmt.Fprintf(os.Stderr, "Sorry, block devices not supported yet\n")
-			//err = syscall.Mknod(hdr.Name, os.S_IFBLK,
+			err = errors.New("block devices unsupported")
+			err = syscall.Mknod(hdr.Name, syscall.S_IFBLK, makedev(hdr.Devmajor, hdr.Devminor))
 		}
 
 		if err != nil {

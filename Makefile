@@ -9,4 +9,7 @@ $(TARGET): $(GO_SRC)
 clean:
 	go clean
 
-.PHONY: clean
+test:
+	go test
+
+.PHONY: clean test
